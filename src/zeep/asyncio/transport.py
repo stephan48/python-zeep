@@ -6,6 +6,8 @@ import asyncio
 import logging
 
 import aiohttp
+import async_timeout
+
 from requests import Response
 
 from zeep.asyncio import bindings
@@ -47,7 +49,7 @@ class AsyncTransport(Transport):
 
         async def _load_remote_data_async():
             nonlocal result
-            with aiohttp.Timeout(self.load_timeout):
+            with async_timeout.timeout(self.load_timeout):
                 response = await self.session.get(url)
                 result = await response.read()
                 try:
@@ -65,7 +67,7 @@ class AsyncTransport(Transport):
 
     async def post(self, address, message, headers):
         self.logger.debug("HTTP Post to %s:\n%s", address, message)
-        with aiohttp.Timeout(self.operation_timeout):
+        with async_timeout.timeout(self.operation_timeout):
             response = await self.session.post(
                 address, data=message, headers=headers)
             self.logger.debug(
@@ -79,7 +81,7 @@ class AsyncTransport(Transport):
         return await self.new_response(response)
 
     async def get(self, address, params, headers):
-        with aiohttp.Timeout(self.operation_timeout):
+        with async_timeout.timeout(self.operation_timeout):
             response = await self.session.get(
                 address, params=params, headers=headers)
 
